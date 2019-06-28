@@ -17,6 +17,7 @@ use Concrete\Package\CommunityStore\Src\CommunityStore\Utilities\Calculator as S
 use Concrete\Package\CommunityStore\Src\CommunityStore\Shipping\Method\ShippingMethod as StoreShippingMethod;
 use Concrete\Package\CommunityStore\Src\CommunityStore\Utilities\Price as StorePrice;
 use Concrete\Package\CommunityStore\Src\CommunityStore\Utilities\Tax as StoreTaxHelper;
+use Concrete\Package\CommunityStore\Src\CommunityStore\Utilities\Wholesale as StoreWholesaleHelper; 
 use Concrete\Package\CommunityStore\Entity\Attribute\Key\StoreOrderKey;
 use Concrete\Core\Multilingual\Page\Section\Section;
 use Concrete\Core\Page\Page;
@@ -164,9 +165,16 @@ class Checkout extends PageController
 
         $availableMethods = [];
 
+        $isWholesale = StoreWholesaleHelper::isUserWholesale();
+
         foreach ($enabledMethods as $em) {
             $emmc = $em->getMethodController();
-
+            if($isWholesale  && $em->getID() != 3){
+                continue;
+            }
+            if(!$isWholesale  && $em->getID() == 3){
+                continue;
+            }
             if ($totals['total'] >= $emmc->getPaymentMinimum() && $totals['total'] <= $emmc->getPaymentMaximum()) {
                 $availableMethods[] = $em;
             }
